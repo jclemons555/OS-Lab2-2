@@ -1,29 +1,43 @@
-/* hello_signal.c */
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
 #include <unistd.h>
 //Joshua Clemons
 
-int alarmTrigged = 0;
+// to calculate the number of seconds the program executed for
+#include <time.h>
 
-void handler(int signum)
-{ //signal handler
+int wait = 1;
+
+// noticed that the executionTime and total number of print statements aren't always the same
+int totalPrints = 0;  
+
+void handler(int cignal){
   printf("Hello World!\n");
-  sleep(5);
+  printf("Turing was right!\n");
+  totalPrints ++;
+  wait = 0;
+}
 
+time_t start, stop;
+
+void anotherHandler(int cignal){
+  time(&stop);
+  int executionTime = stop - start;
+  printf("\nTotal execution time: %ds\n", executionTime);
+  printf("Total prints: %d\n", totalPrints);
   
-  alarmTrigged =1;
-  //exit(1); //exit after printing
+  exit(1);
 }
 
-int main(int argc, char * argv[])
-{
-  signal(SIGALRM,handler); //register handler to handle SIGALRM
-  alarm(5); //Schedule a SIGALRM for 1 second
-  while(!alarmTrigged)
-    ; //busy wait for signal to be delivered
-  printf("Turing Was Right!\n");
-  return 0; //never reached
+int main(int argc, char * argv[]){
+  signal(SIGINT, anotherHandler);
+  signal(SIGALRM, handler);
+  time(&start);
+  while (1) {
+    alarm(1);
+    while(wait);
+    wait = 1;
+  }
+  return 0;
 }
-
